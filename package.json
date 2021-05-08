@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/Aveek-Saha/GistBlog/issues"
   },
-  "homepage": "https://github.com/Aveek-Saha/GistBlog#readme"
+  "homepage": "https://github.com/Aveek-Saha/GistBlog#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
