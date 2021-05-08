@@ -17,6 +17,5 @@
   },
   "homepage": "https://github.com/Aveek-Saha/GistBlog#readme",
   "dependencies": {
-    "express": "^4.17.1"
   }
 }
