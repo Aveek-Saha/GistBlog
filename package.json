@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Aveek-Saha/GistBlog#readme",
   "dependencies": {
+    "@octokit/rest": "^18.5.3",
     "markdown-it": "^12.0.6"
   }
 }
