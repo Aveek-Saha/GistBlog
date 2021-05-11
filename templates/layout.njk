@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gist Blog</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.7.2/build/styles/atom-one-dark.min.css">
+  <style>
+    :root {
+        --code: #dbdbdb;
+    }
+    </style>
+</head>
+<body>
+  {% include "partials/header.njk" %}
+
+  <article class="content">
+      {% include "partials/content.njk" %}
+
+  </article>  
+
+  {% include "partials/footer.njk" %}
+</body>
+</html>
