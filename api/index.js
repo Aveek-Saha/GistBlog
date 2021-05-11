@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
             return ''; // use external default escaping
           }
       });
-    nunjucks.configure( '../templates', {
+    nunjucks.configure( 'templates', {
         autoescape: false
     } ) ;
 
