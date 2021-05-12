@@ -1,10 +1,13 @@
 module.exports = async (req, res) => {
     const { id = '' } = req.query
     const { Octokit } = require("@octokit/rest");
+    const { join } = require('path');
     var MarkdownIt = require('markdown-it');
     var nunjucks = require('nunjucks');
     var hljs = require('highlight.js');
     
+    const template = join(__dirname, 'templates')
+    console.log(template);
     const octokit = new Octokit();
     const md = new MarkdownIt({
         html: true,
@@ -20,7 +23,7 @@ module.exports = async (req, res) => {
             return ''; // use external default escaping
           }
       });
-    nunjucks.configure( 'templates', {
+    nunjucks.configure( template, {
         autoescape: false
     } ) ;
 
