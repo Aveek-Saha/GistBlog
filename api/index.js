@@ -2,9 +2,10 @@ module.exports = async (req, res) => {
     const { id = '' } = req.query
     const { Octokit } = require("@octokit/rest");
     const { join } = require('path');
-    var MarkdownIt = require('markdown-it');
-    var nunjucks = require('nunjucks');
-    var hljs = require('highlight.js');
+    const MarkdownIt = require('markdown-it');
+    const nunjucks = require('nunjucks');
+    const hljs = require('highlight.js');
+    const meta = require('markdown-it-meta');
     
     const template = join(__dirname, 'templates');
 
@@ -23,6 +24,7 @@ module.exports = async (req, res) => {
             return ''; // use external default escaping
           }
       });
+    md.use(meta)
     nunjucks.configure( template, {
         autoescape: false
     } ) ;
@@ -30,6 +32,8 @@ module.exports = async (req, res) => {
     var gist = await octokit.gists.get({ gist_id: id });
     var markdown = gist.data.files[Object.keys(gist.data.files)[0]].content
     var result = md.render(markdown);
+
+    console.log(md.meta);
 
     var html = nunjucks.render('layout.njk', { 
         owner: gist.data.owner, 
