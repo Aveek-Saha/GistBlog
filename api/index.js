@@ -33,12 +33,20 @@ module.exports = async (req, res) => {
     var markdown = gist.data.files[Object.keys(gist.data.files)[0]].content
     var result = md.render(markdown);
 
-    console.log(md.meta);
+    var description = "A Gist Blog post"
+    var title = "Gist Blog"
+    if(md.meta.description)
+        description = md.meta.description
+    if(md.meta.title)
+        title = md.meta.title
+    
 
     var html = nunjucks.render('layout.njk', { 
         owner: gist.data.owner, 
         url: gist.data.html_url,
         id: gist.data.id,
+        description: description,
+        title: title,
         content: result 
     });
 
