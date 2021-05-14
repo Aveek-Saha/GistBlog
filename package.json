@@ -4,7 +4,14 @@
   "description": "Turn your GitHub Gists into a blog",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format-check": "prettier --check \"{,!(node_modules)/**/}*.{js,html}\"",
+    "format": "prettier --write \"{,!(node_modules)/**/}*.{js,html}\""
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged --pattern \"**/*.*(js|html)\""
+    }
   },
   "repository": {
     "type": "git",
@@ -25,6 +32,8 @@
     "nunjucks": "^3.2.3"
   },
   "devDependencies": {
-    "prettier": "2.2.1"
+    "husky": "^6.0.0",
+    "prettier": "2.2.1",
+    "pretty-quick": "^3.1.0"
   }
 }
