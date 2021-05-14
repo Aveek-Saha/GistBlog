@@ -19,6 +19,7 @@
   "dependencies": {
     "@octokit/rest": "^18.5.3",
     "highlight.js": "^10.7.2",
+    "js-yaml": "^4.1.0",
     "markdown-it": "^12.0.6",
     "markdown-it-meta": "0.0.1",
     "nunjucks": "^3.2.3"
