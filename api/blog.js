@@ -6,8 +6,13 @@ module.exports = async (req, res) => {
     const { load } = require('js-yaml')
     
     const template = join(__dirname, 'templates');
+    nunjucks.configure( template, {
+      autoescape: false
+  } ) ;
 
-    const octokit = new Octokit();
+    const octokit = new Octokit({
+      auth: "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",
+    });
 
     var gists = await octokit.gists.listForUser({
       username
@@ -32,6 +37,7 @@ module.exports = async (req, res) => {
     });
 
     var page_ids = ids.slice((page-1)*5, page*5)
+    var num_pages = Math.ceil(ids.length/5)
 
     const findMetadataIndices = (mem, item, i) => {
       if (/^---/.test(item)) {
@@ -60,8 +66,25 @@ module.exports = async (req, res) => {
     for (const id of page_ids) {
       var gist = await octokit.gists.get({ gist_id: id });
       var markdown = gist.data.files[Object.keys(gist.data.files)[0]].content
-      meta.push(parseMD(markdown))
+      var parsed = parseMD(markdown)
+      var data = {
+        title: parsed.title,
+        description: parsed.description,
+        id: id
+      }
+      meta.push(data)
     }
 
-    res.send(meta)
+    var owner
+
+    if (mdFiles.length > 0)
+      owner = mdFiles[0].owner
+
+    var html = nunjucks.render('blog.njk', { 
+      data: meta,
+      owner: owner,
+      num_pages: num_pages
+    });
+
+    res.send(html)
 }

@@ -10,5 +10,33 @@
 </head>
 <body>
 
+    <h1>
+        <a href="{{ owner.html_url }}">{{ owner.login }}</a>'s Blog
+        <img src="{{ owner.avatar_url }}" alt="Avatar img" style="float: right; height: 45px; width: auto; border-radius: 50%;">
+    </h1>
+    <hr>
+    <br>
+
+    <div>
+        {% for item in data %}
+            <div>
+                <a href="/post/{{item.id}}" style="color: var(--text-main); ">
+                    <h2 style="margin-bottom: 0px">{{ item.title }}</h2>
+                    <p style="margin-top: 0px"><em>{{ item.description }} </em></p>
+                </a>
+            </div>
+        {% else %}
+            <h2>No posts</h2>
+        {% endfor %}
+    </div>
+
+
+    <div style="text-align: center;">
+        {% for i in range(0, num_pages) -%}
+            <a href="/{{ owner.login }}?page={{ i+1 }}"><button style="padding: 10px;">
+            {{ i+1 }}</button></a>
+        {%- endfor %}
+    </div>
+
 </body>
 </html>
