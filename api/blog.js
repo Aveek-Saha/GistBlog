@@ -1,18 +1,20 @@
 module.exports = async (req, res) => {
     const { username = '', page = 1 } = req.query
+
     const { Octokit } = require("@octokit/rest");
     const { join } = require('path');
+    const { load } = require('js-yaml');
     const nunjucks = require('nunjucks');
-    const { load } = require('js-yaml')
     
     const template = join(__dirname, 'templates');
     nunjucks.configure( template, {
-      autoescape: false
-  } ) ;
-
-    const octokit = new Octokit({
-      auth: "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",
+        autoescape: false
     });
+
+    const octokit = new Octokit();
+    var ids = []
+    var meta = []
+    var owner
 
     var gists = await octokit.gists.listForUser({
       username
@@ -30,7 +32,6 @@ module.exports = async (req, res) => {
       return dateA > dateB
     });
 
-    var ids = []
 
     mdFiles.forEach(file => {
       ids.push(file.id)
@@ -61,7 +62,6 @@ module.exports = async (req, res) => {
       return metadata
     }
 
-    var meta = []
 
     for (const id of page_ids) {
       var gist = await octokit.gists.get({ gist_id: id });
@@ -75,12 +75,11 @@ module.exports = async (req, res) => {
       meta.push(data)
     }
 
-    var owner
 
     if (mdFiles.length > 0)
       owner = mdFiles[0].owner
 
-    var html = nunjucks.render('blog.njk', { 
+    var html = nunjucks.render('blog.html', { 
       data: meta,
       owner: owner,
       num_pages: num_pages

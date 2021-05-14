@@ -41,7 +41,7 @@ module.exports = async (req, res) => {
         title = md.meta.title
     
 
-    var html = nunjucks.render('layout.njk', { 
+    var html = nunjucks.render('post.html', { 
         owner: gist.data.owner, 
         url: gist.data.html_url,
         id: gist.data.id,
