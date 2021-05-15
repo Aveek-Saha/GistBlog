@@ -10,7 +10,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "pretty-quick --staged --pattern \"**/*.*(js|html)\""
+      "pre-commit": "prettier --write \"{,!(node_modules)/**/}*.{js,html}\""
     }
   },
   "repository": {
