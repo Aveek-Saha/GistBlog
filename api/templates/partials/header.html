@@ -1,10 +1,11 @@
 <p>
-    <a href="{{ owner.html_url }}">{{ owner.login }}</a> /
-    <a href="{{ url }}">{{ id }}</a>
+    <span style="font-size: 0.9rem">
+        <a href="{{ owner.html_url }}">{{ owner.login }}</a> /
+        <a href="{{ url }}">{{ id }}</a>
+    </span>
     <img
         src="{{ owner.avatar_url }}"
         alt="Avatar img"
         style="float: right; height: 32px; width: auto; border-radius: 50%"
     />
 </p>
-<hr />

@@ -7,8 +7,19 @@
 
         <title>{{ title }}</title>
         <link
+            rel="preload"
+            as="style"
+            href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.min.css"
+        />
+        <link
+            rel="preload"
+            as="style"
+            href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.min.css"
+        />
+        <link
             rel="stylesheet"
-            href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css"
+            id="js-stylesheet"
+            href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css"
         />
         <link
             rel="stylesheet"
@@ -19,11 +30,11 @@
                 --code: #dbdbdb;
                 --background: #161f27;
             }
-            article{
-              font-size: 1.05rem;
+            article {
+                font-size: 1.05rem;
             }
             code {
-              font-size: 1rem;
+                font-size: 1rem;
             }
         </style>
     </head>
@@ -32,6 +43,46 @@
 
         <article class="content">{% include "partials/content.html" %}</article>
 
-        {% include "partials/footer.html" %}
+        {% include "partials/footer.html" %} {#
+        <button
+            style="
+                border-radius: 50%;
+                padding: 3px;
+                font-size: 1.8rem;
+                position: fixed;
+                bottom: 10px;
+                right: 10px;
+            "
+        >
+            🔆
+        </button>
+        #}
+        <button
+            style="
+                border-radius: 50%;
+                padding: 3px;
+                font-size: 1.8rem;
+                position: fixed;
+                bottom: 10px;
+                right: 10px;
+            "
+        >
+            🌙
+        </button>
+
+        <script>
+            const updateTheme = () => {
+                const theme = themeForm.querySelector(
+                    'input[name="theme"]:checked'
+                ).value;
+
+                const fileName = `${
+                    theme === "auto" ? "water" : theme
+                }.min.css`;
+                const localUrl = `${localBase}${fileName}`;
+
+                stylesheet.href = localUrl;
+            };
+        </script>
     </body>
 </html>
