@@ -43,8 +43,10 @@
 
         <article class="content">{% include "partials/content.html" %}</article>
 
-        {% include "partials/footer.html" %} {#
+        {% include "partials/footer.html" %}
+
         <button
+            id="theme"
             style="
                 border-radius: 50%;
                 padding: 3px;
@@ -53,34 +55,30 @@
                 bottom: 10px;
                 right: 10px;
             "
-        >
-            🔆
-        </button>
-        #}
-        <button
-            style="
-                border-radius: 50%;
-                padding: 3px;
-                font-size: 1.8rem;
-                position: fixed;
-                bottom: 10px;
-                right: 10px;
-            "
+            onclick="updateTheme()"
         >
             🌙
         </button>
 
         <script>
+            const localBase = "https://cdn.jsdelivr.net/npm/water.css@2/out/";
+            const prefersColorScheme = window.matchMedia(
+                "(prefers-color-scheme: light)"
+            );
+            var theme = prefersColorScheme.matches ? "light" : "dark";
+            const stylesheet = document.getElementById("js-stylesheet");
+            const themeBtn = document.getElementById("theme");
+
             const updateTheme = () => {
-                const theme = themeForm.querySelector(
-                    'input[name="theme"]:checked'
-                ).value;
-
-                const fileName = `${
-                    theme === "auto" ? "water" : theme
-                }.min.css`;
+                if (theme == "light") {
+                    themeBtn.innerHTML = "🌙";
+                    theme = "dark";
+                } else {
+                    themeBtn.innerHTML = "🔆";
+                    theme = "light";
+                }
+                const fileName = `${theme}.min.css`;
                 const localUrl = `${localBase}${fileName}`;
-
                 stylesheet.href = localUrl;
             };
         </script>
