@@ -69,6 +69,13 @@
             const stylesheet = document.getElementById("js-stylesheet");
             const themeBtn = document.getElementById("theme");
 
+            const changeBtn = () => {
+                if (theme == "light") {
+                    themeBtn.innerHTML = "🌙";
+                } else {
+                    themeBtn.innerHTML = "🔆";
+                }
+            };
             const updateTheme = () => {
                 if (theme == "light") {
                     themeBtn.innerHTML = "🌙";
@@ -81,6 +88,7 @@
                 const localUrl = `${localBase}${fileName}`;
                 stylesheet.href = localUrl;
             };
+            changeBtn();
         </script>
     </body>
 </html>
