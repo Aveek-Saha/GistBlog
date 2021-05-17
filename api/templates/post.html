@@ -12,26 +12,22 @@
             href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.min.css"
         />
         <link
-            rel="preload"
-            as="style"
+            rel="stylesheet"
+            id="js-stylesheet"
             href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.min.css"
         />
-        <link
+        <!-- <link
             rel="stylesheet"
             id="js-stylesheet"
             href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css"
-        />
-        <link
-            rel="stylesheet"
-            href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.7.2/build/styles/atom-one-dark.min.css"
-        />
+        /> -->
         <style>
             :root {
                 --code: #dbdbdb;
                 --background: #161f27;
             }
             article {
-                font-size: 1.05rem;
+                font-size: 1.2rem;
             }
             code {
                 font-size: 1rem;
@@ -65,7 +61,7 @@
             const prefersColorScheme = window.matchMedia(
                 "(prefers-color-scheme: light)"
             );
-            var theme = prefersColorScheme.matches ? "light" : "dark";
+            var theme = "light"
             const stylesheet = document.getElementById("js-stylesheet");
             const themeBtn = document.getElementById("theme");
 
@@ -74,15 +70,21 @@
                     themeBtn.innerHTML = "🌙";
                 } else {
                     themeBtn.innerHTML = "🔆";
+                    document.documentElement.style
+                    .setProperty('--background-body', '#282c34');
                 }
             };
             const updateTheme = () => {
                 if (theme == "light") {
                     themeBtn.innerHTML = "🌙";
                     theme = "dark";
+                    document.documentElement.style
+                    .setProperty('--background-body', '#282c34');
                 } else {
                     themeBtn.innerHTML = "🔆";
                     theme = "light";
+                    document.documentElement.style
+                    .setProperty('--background-body', '#fff');
                 }
                 const fileName = `${theme}.min.css`;
                 const localUrl = `${localBase}${fileName}`;
