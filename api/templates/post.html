@@ -66,13 +66,18 @@
             const prefersColorScheme = window.matchMedia(
                 "(prefers-color-scheme: light)"
             );
-            var theme = "light";
+            var theme = window.localStorage.getItem("mode") || "light";
+            console.log(theme);
             const stylesheet = document.getElementById("js-stylesheet");
             const themeBtn = document.getElementById("theme");
 
             const changeBtn = () => {
                 if (theme == "light") {
                     themeBtn.innerHTML = "🌙";
+                    document.documentElement.style.setProperty(
+                        "--background-body",
+                        "#fff"
+                    );
                 } else {
                     themeBtn.innerHTML = "🔆";
                     document.documentElement.style.setProperty(
@@ -80,26 +85,21 @@
                         "#282c34"
                     );
                 }
+
+                window.localStorage.setItem("mode", theme);
+                const fileName = `${theme}.min.css`;
+                const localUrl = `${localBase}${fileName}`;
+                stylesheet.href = localUrl;
             };
             const updateTheme = () => {
                 if (theme == "light") {
                     themeBtn.innerHTML = "🌙";
                     theme = "dark";
-                    document.documentElement.style.setProperty(
-                        "--background-body",
-                        "#282c34"
-                    );
                 } else {
                     themeBtn.innerHTML = "🔆";
                     theme = "light";
-                    document.documentElement.style.setProperty(
-                        "--background-body",
-                        "#fff"
-                    );
                 }
-                const fileName = `${theme}.min.css`;
-                const localUrl = `${localBase}${fileName}`;
-                stylesheet.href = localUrl;
+                changeBtn();
             };
             changeBtn();
         </script>
