@@ -11,16 +11,30 @@ Gist Blog is for posts that don't belong on your usual blog, maybe because it do
 # Usage
 
 ## Create a blog post
-1. Create a [GitHub Gist](https://gist.github.com/) in Markdown. Make sure the file name ends with _post.md
+1. Create a [GitHub Gist](https://gist.github.com/) in Markdown. 
+Make sure the file name ends with `_post.md` and has a title parameter in the `metadata`<sup>*</sup>.
 1. Replace the URL: <br>
     `gist.github.com/{username}/`*{gist-id}* with <br>
     `gistblog.vercel.app/post/`*{gist-id}*
 1. Your blog post is ready!
 
-## List all posts on your profile:
+## Blog:
+List all posts on your profile
 1. Create multiple posts using the instructions above
 1. Go to: `gistblog.vercel.app/`*{username}*
 1. Your blog is ready!
+
+## *Metadata
+You can add metadata to your post in the form of yaml at the top of your markdown file. The syntax for metadata is as follows
+
+```
+---
+title: A very interesting and unique blog title
+description: An even more interesting and unique description that provides more info about the post
+---
+```
+
+For posts to show up in your blog page they **MUST** have the `title` field and a file name ending with `metadata`.
 
 # Features
 * Turn any GitHub Gist into a blog post.
@@ -38,7 +52,7 @@ cd GistBlog
 vercel dev
 ```
 
-Then go to `localhost:3000` to see the sit up and running
+Then go to `localhost:3000` to see the site up and running
  
 ### Note:
 For listing all posts on your profile, the content of each post has to be retreived. This is why only 5 posts are shown per page and even then the page might take 3~4 seconds to load.

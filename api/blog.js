@@ -71,12 +71,14 @@ module.exports = async (req, res) => {
         var gist = await octokit.gists.get({ gist_id: id });
         var markdown = gist.data.files[Object.keys(gist.data.files)[0]].content;
         var parsed = parseMD(markdown);
-        var data = {
-            title: parsed.title,
-            description: parsed.description,
-            id: id
-        };
-        meta.push(data);
+        if (parsed.title) {
+            var data = {
+                title: parsed.title,
+                description: parsed.description,
+                id: id
+            };
+            meta.push(data);
+        }
     }
 
     if (mdFiles.length > 0) owner = mdFiles[0].owner;
