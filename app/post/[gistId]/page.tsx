@@ -7,7 +7,7 @@ interface PostPageProps {
 }
 
 export default async function PostPage({ params }: PostPageProps) {
-    const { gistId } = params;
+    const { gistId } = await params;
     const markdownContent = await fetchGistById(gistId);
 
     return (

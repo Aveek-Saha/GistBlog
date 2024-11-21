@@ -23,7 +23,7 @@ export async function fetchGists(
 
     return data.filter(
         (gist) =>
-            gist.id.startsWith("gistblog") &&
+            // gist.id.startsWith("gistblog") &&
             Object.values(gist.files).some((file) =>
                 file.filename.endsWith(".md")
             )
