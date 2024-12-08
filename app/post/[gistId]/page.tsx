@@ -4,6 +4,7 @@ import { fetchGistById } from "../../../lib/github";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/atom-one-dark.css";
 
 interface PostPageProps {
     params: {
@@ -22,7 +23,12 @@ export default async function PostPage({ params }: PostPageProps) {
                 <h1>Post</h1>
                 <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeHighlight]}
+                    rehypePlugins={[
+                        [
+                            rehypeHighlight,
+                            { detect: true }, // Enables language detection
+                        ],
+                    ]}
                 >
                     {markdownContent}
                 </ReactMarkdown>
