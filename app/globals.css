@@ -1,0 +1,21 @@
+@import url("@/public/bolt.min.css") all;
+
+:root {
+    --links: var(--text);
+}
+
+body {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 0 10px;
+    word-wrap: break-word;
+}
+
+pre {
+    border: none;
+    padding: 0px;
+}
+
+code , pre {
+    max-width: 100%;
+}
