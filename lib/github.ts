@@ -12,22 +12,46 @@ interface Gist {
     files: Record<string, GistFile>;
     description: string;
 }
+
+interface Metadata {
+    date?: string;
+    time?: string;
+    heading?: string;
+    [key: string]: any;
+}
+
 export async function fetchGists(
     username: string,
     page: number = 1
-): Promise<Gist[]> {
+): Promise<(Gist & { metadata: Metadata | null })[]> {
     const response = await fetch(
         `${GITHUB_API_URL}/users/${username}/gists?page=${page}`
     );
     const data: Gist[] = await response.json();
 
-    return data.filter(
-        (gist) =>
-            // gist.id.startsWith("gistblog") &&
+    // Filter and parse metadata from description
+    return data
+        .filter((gist) =>
             Object.values(gist.files).some((file) =>
                 file.filename.endsWith(".md")
             )
-    );
+        )
+        .map((gist) => {
+            let metadata: Metadata | null = null;
+            try {
+                if (gist.description.trim().startsWith('{') && gist.description.trim().endsWith('}')) {
+                    console.log(gist.description);
+                    metadata = JSON.parse(gist.description); // Parse JSON from the description
+                    
+                }
+            } catch (error) {
+                console.error(
+                    `Failed to parse metadata for gist ${gist.id}:`,
+                    error
+                );
+            }
+            return { ...gist, metadata };
+        });
 }
 
 export async function fetchGistById(gistId: string): Promise<string> {
@@ -42,8 +66,6 @@ export async function fetchGistById(gistId: string): Promise<string> {
     }
 
     const rawResponse = await fetch(markdownFile.raw_url);
-    const markdownContent = await rawResponse.text();
-    console.log(markdownContent);
-
-    return markdownContent;
+    
+    return rawResponse.text();
 }

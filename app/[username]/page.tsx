@@ -1,13 +1,5 @@
 import { fetchGists } from "../../lib/github";
-
-interface Gist {
-    id: string;
-    files: {
-        [key: string]: {
-            filename: string;
-        };
-    };
-}
+import styles from "../page.module.css";
 
 interface UserPostsPageProps {
     params: {
@@ -17,19 +9,27 @@ interface UserPostsPageProps {
 
 export default async function UserPostsPage({ params }: UserPostsPageProps) {
     const { username } = await params;
-    const gists: Gist[] = await fetchGists(username);
+    const gists = await fetchGists(username);
 
     return (
-        <div>
+        <div className={styles.page}>
             <h1>{username}'s Gists</h1>
             <ul>
                 {gists.map((gist) => {
-                    // Get the first file's name in the gist
-                    const fileName = Object.values(gist.files)[0].filename;
+                    const fileName = Object.values(gist.files)[0]?.filename;
+                    const metadata = gist.metadata;
 
                     return (
                         <li key={gist.id}>
-                            <a href={`/post/${gist.id}`}>{fileName}</a>
+                            <a href={`/post/${gist.id}`}>
+                                <strong>{metadata?.heading || fileName}</strong>
+                            </a>
+                            {metadata && (
+                                <div>
+                                    <p>Date: {metadata.date || "Unknown"}</p>
+                                    <p>Time: {metadata.time || "Unknown"}</p>
+                                </div>
+                            )}
                         </li>
                     );
                 })}
