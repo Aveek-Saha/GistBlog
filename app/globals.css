@@ -1,7 +1,16 @@
 @import url("@/public/bolt.min.css") all;
+@import url("highlight.js/styles/atom-one-dark.css") (prefers-color-scheme: dark);
+@import url("highlight.js/styles/atom-one-light.css") (prefers-color-scheme: light);
 
 :root {
     --links: var(--text);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-body: #120c0e;
+        --text: #d9d8dc;
+    }
 }
 
 body {
@@ -16,6 +25,10 @@ pre {
     padding: 0px;
 }
 
-code , pre {
+code, pre {
     max-width: 100%;
+}
+
+.hljs {
+    background: var(--background-main);
 }
