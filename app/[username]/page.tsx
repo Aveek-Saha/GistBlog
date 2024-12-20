@@ -15,10 +15,13 @@ export default async function UserPostsPage({ params }: UserPostsPageProps) {
     if (gists.length > 0) owner = gists[0].owner;
 
     return (
-        <div className={styles.page}>
+        <div>
             <div className="header">
-                <h1>
-                    <a href={owner.html_url} className="link">{owner.login}</a>'s Blog
+                <h1 className=" user-info">
+                    <a href={owner.html_url} className="link">
+                        {owner.login}
+                    </a>
+                    's Blog
                     <img
                         className="profile-picture"
                         src={owner.avatar_url}
@@ -35,13 +38,13 @@ export default async function UserPostsPage({ params }: UserPostsPageProps) {
                         return (
                             <li key={gist.id}>
                                 <a href={`/post/${gist.id}`} className="link">
-                                    <h4>
-                                        {metadata?.heading || fileName}
-                                    </h4>
+                                    <h4>{metadata?.heading || fileName}</h4>
                                     <div>
                                         <span>
-                                            Date: {metadata?.date || gist.created_at}
-                                        </span> |{" "}
+                                            Date:{" "}
+                                            {metadata?.date || gist.created_at}
+                                        </span>{" "}
+                                        |{" "}
                                         <span>
                                             Time: {metadata?.time || "Unknown"}
                                         </span>

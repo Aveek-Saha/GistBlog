@@ -34,10 +34,10 @@ code, pre {
 }
 
 .profile-picture {
-    float: right;
     height: 50px;
     width: auto;
     border-radius: 50%;
+    margin-left: auto;
 }
 
 .header {
@@ -64,5 +64,6 @@ code, pre {
 .user-info {
     display: flex;
     align-items: center;
+    justify-items: center;
     margin-bottom: 10px;
 }

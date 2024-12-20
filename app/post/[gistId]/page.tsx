@@ -17,7 +17,7 @@ export default async function PostPage({ params }: PostPageProps) {
     const { gistId } = await params;
 
     try {
-        const {markdownContent, owner} = await fetchGistById(gistId);
+        const { markdownContent, owner } = await fetchGistById(gistId);
 
         return (
             <div>

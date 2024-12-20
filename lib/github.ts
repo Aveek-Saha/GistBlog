@@ -65,7 +65,9 @@ export async function fetchGists(
         });
 }
 
-export async function fetchGistById(gistId: string): Promise<{markdownContent: string, owner: Owner}> {
+export async function fetchGistById(
+    gistId: string
+): Promise<{ markdownContent: string; owner: Owner }> {
     const response = await fetch(`${GITHUB_API_URL}/gists/${gistId}`);
     const data: Gist = await response.json();
 
@@ -75,9 +77,9 @@ export async function fetchGistById(gistId: string): Promise<{markdownContent: s
     if (!markdownFile) {
         throw new Error(`No markdown file found in gist: ${gistId}`);
     }
-    
+
     const markdownContent = markdownFile.content;
     var owner: Owner = data.owner;
-    
-    return {markdownContent, owner};
+
+    return { markdownContent, owner };
 }
