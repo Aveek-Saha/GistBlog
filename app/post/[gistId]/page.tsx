@@ -1,4 +1,4 @@
-import { fetchGistById } from "../../../lib/github";
+import { fetchGistById, Owner } from "../../../lib/github";
 // import styles from "../../page.module.css";
 
 import ReactMarkdown from "react-markdown";
@@ -17,10 +17,24 @@ export default async function PostPage({ params }: PostPageProps) {
     const { gistId } = await params;
 
     try {
-        const markdownContent = await fetchGistById(gistId);
+        const {markdownContent, owner} = await fetchGistById(gistId);
 
         return (
             <div>
+                <div className="user-info">
+                    <a href={owner.html_url} className="link">
+                        {owner.login}
+                    </a>
+                    /
+                    <a href="https://gist.github.com/{owner.login}/{gistId}">
+                        {gistId}
+                    </a>
+                    <img
+                        className="profile-picture"
+                        src={owner.avatar_url}
+                        alt={owner.login}
+                    />
+                </div>
                 <h1>Post</h1>
                 <ReactMarkdown
                     remarkPlugins={[remarkGfm]}

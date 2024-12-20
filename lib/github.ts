@@ -5,19 +5,29 @@ interface GistFile {
     type: string;
     raw_url: string;
     language: string;
+    content: string;
+    owner: Owner;
 }
 
 interface Gist {
     id: string;
     files: Record<string, GistFile>;
     description: string;
+    owner: Owner;
+    created_at: string;
 }
 
 interface Metadata {
     date?: string;
-    time?: string;
-    heading?: string;
+    title?: string;
+    description?: string;
     [key: string]: any;
+}
+
+export interface Owner {
+    login: string;
+    avatar_url: string;
+    html_url: string;
 }
 
 export async function fetchGists(
@@ -39,10 +49,11 @@ export async function fetchGists(
         .map((gist) => {
             let metadata: Metadata | null = null;
             try {
-                if (gist.description.trim().startsWith('{') && gist.description.trim().endsWith('}')) {
-                    console.log(gist.description);
+                if (
+                    gist.description.trim().startsWith("{") &&
+                    gist.description.trim().endsWith("}")
+                ) {
                     metadata = JSON.parse(gist.description); // Parse JSON from the description
-                    
                 }
             } catch (error) {
                 console.error(
@@ -54,7 +65,7 @@ export async function fetchGists(
         });
 }
 
-export async function fetchGistById(gistId: string): Promise<string> {
+export async function fetchGistById(gistId: string): Promise<{markdownContent: string, owner: Owner}> {
     const response = await fetch(`${GITHUB_API_URL}/gists/${gistId}`);
     const data: Gist = await response.json();
 
@@ -64,8 +75,9 @@ export async function fetchGistById(gistId: string): Promise<string> {
     if (!markdownFile) {
         throw new Error(`No markdown file found in gist: ${gistId}`);
     }
-
-    const rawResponse = await fetch(markdownFile.raw_url);
     
-    return rawResponse.text();
+    const markdownContent = markdownFile.content;
+    var owner: Owner = data.owner;
+    
+    return {markdownContent, owner};
 }

@@ -32,3 +32,37 @@ code, pre {
 .hljs {
     background: var(--background-main);
 }
+
+.profile-picture {
+    float: right;
+    height: 50px;
+    width: auto;
+    border-radius: 50%;
+}
+
+.header {
+    margin-bottom: 20px;
+}
+
+.posts {
+    margin: 20px auto;
+}
+
+.post-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.link {
+    text-decoration: none;
+}
+
+.link:hover {
+    text-decoration: underline;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
