@@ -67,3 +67,32 @@ code, pre {
     justify-items: center;
     margin-bottom: 10px;
 }
+
+.post-list li a {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    width: 100%;
+    padding: 15px;
+}
+
+.post-content {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.post-content h4 {
+    margin: 0;
+}
+
+.post-description {
+    color: var(--text-light);
+    font-size: 0.9em;
+}
+
+.post-date {
+    align-self: center;
+    color: var(--text-light);
+    font-size: 0.9em;
+}

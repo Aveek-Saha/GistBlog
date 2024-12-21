@@ -38,16 +38,20 @@ export default async function UserPostsPage({ params }: UserPostsPageProps) {
                         return (
                             <li key={gist.id}>
                                 <a href={`/post/${gist.id}`} className="link">
-                                    <h4>{metadata?.heading || fileName}</h4>
-                                    <div>
-                                        <span>
-                                            Date:{" "}
-                                            {metadata?.date || gist.created_at}
-                                        </span>{" "}
-                                        |{" "}
-                                        <span>
-                                            Time: {metadata?.time || "Unknown"}
-                                        </span>
+                                    <div className="post-content">
+                                        <h4>{fileName?.replace(/_/g, ' ').replace(/\.md$/, '')}</h4>
+                                        <div className="post-description">
+                                            {gist.description}
+                                        </div>
+                                    </div>
+                                    <div className="post-date">
+                                        {new Date(
+                                            gist.created_at
+                                        ).toLocaleDateString("en-US", {
+                                            day: "numeric",
+                                            month: "short",
+                                            year: "numeric",
+                                        })}
                                     </div>
                                 </a>
                             </li>
