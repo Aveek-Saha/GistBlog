@@ -1,10 +1,7 @@
 import { fetchGists, Owner } from "../../lib/github";
-import styles from "../page.module.css";
 
 interface UserPostsPageProps {
-    params: {
-        username: string;
-    };
+    params: Promise<{ username: string }>;
 }
 
 export default async function UserPostsPage({ params }: UserPostsPageProps) {
@@ -39,7 +36,11 @@ export default async function UserPostsPage({ params }: UserPostsPageProps) {
                             <li key={gist.id}>
                                 <a href={`/post/${gist.id}`} className="link">
                                     <div className="post-content">
-                                        <h4>{fileName?.replace(/_/g, ' ').replace(/\.md$/, '')}</h4>
+                                        <h4>
+                                            {fileName
+                                                ?.replace(/_/g, " ")
+                                                .replace(/\.md$/, "")}
+                                        </h4>
                                         <div className="post-description">
                                             {gist.description}
                                         </div>
