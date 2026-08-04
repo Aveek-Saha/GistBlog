@@ -3,6 +3,8 @@ const GITHUB_API_VERSION = "2022-11-28";
 const GITHUB_REVALIDATE_SECONDS = 300;
 const GITHUB_REQUEST_TIMEOUT_MS = 8_000;
 const MAX_MARKDOWN_BYTES = 512_000;
+const GISTS_PER_GITHUB_PAGE = 100;
+const MAX_GITHUB_PAGES = 10;
 
 export const BLOG_POSTS_PER_PAGE = 5;
 
@@ -24,6 +26,8 @@ interface GitHubGist {
     owner: Owner | null;
     created_at: string;
     updated_at: string;
+    comments?: number;
+    history?: Array<{ version: string }>;
 }
 
 export interface PostMetadata {
@@ -31,12 +35,19 @@ export interface PostMetadata {
     title?: string;
     description?: string;
     tags?: string[];
+    canonical?: string;
+    image?: string;
+    draft?: boolean;
 }
 
 export interface Owner {
     login: string;
     avatar_url: string;
     html_url: string;
+    name?: string;
+    bio?: string;
+    blog?: string;
+    location?: string;
 }
 
 export interface BlogPost {
@@ -46,6 +57,7 @@ export interface BlogPost {
     createdAt: string;
     updatedAt: string;
     metadata: PostMetadata;
+    filename: string;
 }
 
 export interface BlogPage {
@@ -65,6 +77,20 @@ export interface GistPost {
     owner: Owner;
     createdAt: string;
     updatedAt: string;
+    sourceMarkdown: string;
+    filename: string;
+    comments: number;
+    revisions: number;
+}
+
+export interface PostNavigationItem {
+    id: string;
+    title: string;
+}
+
+export interface PostNavigation {
+    previous?: PostNavigationItem;
+    next?: PostNavigationItem;
 }
 
 export class GitHubError extends Error {
@@ -134,6 +160,7 @@ async function githubFetch<T>(path: string): Promise<T> {
         response = await fetch(`${GITHUB_API_URL}${path}`, {
             headers: githubHeaders(),
             signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
+            cache: "force-cache",
             next: { revalidate: GITHUB_REVALIDATE_SECONDS },
         });
     } catch (error) {
@@ -187,6 +214,16 @@ function parseScalar(value: string): string {
     return trimmed;
 }
 
+export function normalizeHttpUrl(value: string): string | undefined {
+    try {
+        const url = new URL(value.trim());
+        if (url.protocol !== "https:" && url.protocol !== "http:") return undefined;
+        return url.toString().slice(0, 500);
+    } catch {
+        return undefined;
+    }
+}
+
 export function parsePostMarkdown(markdown: string): {
     content: string;
     metadata: PostMetadata;
@@ -216,6 +253,15 @@ export function parsePostMarkdown(markdown: string): {
             metadata.description = value.slice(0, 500);
         }
         if (key === "date" && value) metadata.date = value.slice(0, 50);
+        if (key === "canonical" && value) {
+            metadata.canonical = normalizeHttpUrl(value);
+        }
+        if ((key === "image" || key === "cover") && value) {
+            metadata.image = normalizeHttpUrl(value);
+        }
+        if (key === "draft" && value) {
+            metadata.draft = ["true", "yes", "1"].includes(value.toLowerCase());
+        }
         if (key === "tags" && value) {
             const tagValue = value.replace(/^\[/, "").replace(/\]$/, "");
             metadata.tags = tagValue
@@ -230,6 +276,20 @@ export function parsePostMarkdown(markdown: string): {
         content: normalized.slice(closingIndex + 5),
         metadata,
     };
+}
+
+function postTitleFromFilename(filename: string): string {
+    return filename
+        .replace(/_post\.md$/i, "")
+        .replace(/\.md$/i, "")
+        .replace(/[_-]+/g, " ")
+        .trim();
+}
+
+function publishedDate(metadata: PostMetadata, fallback: string): string {
+    if (!metadata.date) return fallback;
+    const value = new Date(metadata.date);
+    return Number.isNaN(value.getTime()) ? fallback : value.toISOString();
 }
 
 async function getMarkdownContent(file: GistFile): Promise<string> {
@@ -253,6 +313,7 @@ async function getMarkdownContent(file: GistFile): Promise<string> {
         try {
             response = await fetch(rawUrl, {
                 signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
+                cache: "force-cache",
                 next: { revalidate: GITHUB_REVALIDATE_SECONDS },
             });
         } catch {
@@ -272,7 +333,7 @@ async function getMarkdownContent(file: GistFile): Promise<string> {
     return content;
 }
 
-async function fetchGitHubUser(username: string): Promise<Owner> {
+export async function fetchGitHubUser(username: string): Promise<Owner> {
     const data = await githubFetch<unknown>(
         `/users/${encodeURIComponent(validateGitHubUsername(username))}`
     );
@@ -282,6 +343,16 @@ async function fetchGitHubUser(username: string): Promise<Owner> {
         login: String(data.login ?? username),
         avatar_url: String(data.avatar_url ?? ""),
         html_url: String(data.html_url ?? ""),
+        name: typeof data.name === "string" ? data.name.slice(0, 200) : undefined,
+        bio: typeof data.bio === "string" ? data.bio.slice(0, 500) : undefined,
+        blog:
+            typeof data.blog === "string" && data.blog
+                ? normalizeHttpUrl(
+                      data.blog.startsWith("http") ? data.blog : `https://${data.blog}`
+                  )
+                : undefined,
+        location:
+            typeof data.location === "string" ? data.location.slice(0, 200) : undefined,
     };
 }
 
@@ -291,22 +362,61 @@ async function fetchGist(gistId: string): Promise<GitHubGist> {
     );
 }
 
+async function fetchAllUserGists(username: string): Promise<GitHubGist[]> {
+    const safeUsername = validateGitHubUsername(username);
+    const allGists: GitHubGist[] = [];
+
+    for (let page = 1; page <= MAX_GITHUB_PAGES; page += 1) {
+        const gists = await githubFetch<GitHubGist[]>(
+            `/users/${encodeURIComponent(safeUsername)}/gists?per_page=${GISTS_PER_GITHUB_PAGE}&page=${page}`
+        );
+        allGists.push(...gists);
+        if (gists.length < GISTS_PER_GITHUB_PAGE) break;
+    }
+
+    return allGists;
+}
+
+function sortedPostGists(gists: GitHubGist[]): GitHubGist[] {
+    return gists
+        .filter((gist) => findPostFile(gist.files) !== undefined)
+        .sort(
+            (a, b) =>
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+}
+
+async function gistToBlogPost(gistOrSummary: GitHubGist): Promise<BlogPost | null> {
+    const gist = await fetchGist(gistOrSummary.id);
+    const file = findPostFile(gist.files);
+    if (!file) return null;
+
+    const markdown = await getMarkdownContent(file);
+    const { metadata } = parsePostMarkdown(markdown);
+    if (metadata.draft) return null;
+
+    return {
+        id: gist.id,
+        title: metadata.title || postTitleFromFilename(file.filename) || "Untitled post",
+        description: metadata.description || gist.description || "",
+        createdAt: publishedDate(metadata, gist.created_at),
+        updatedAt: gist.updated_at,
+        metadata,
+        filename: file.filename,
+    };
+}
+
 export async function fetchBlogPage(
     username: string,
     requestedPage = 1
 ): Promise<BlogPage> {
     const safeUsername = validateGitHubUsername(username);
     const page = validatePage(requestedPage);
-    const gists = await githubFetch<GitHubGist[]>(
-        `/users/${encodeURIComponent(safeUsername)}/gists?per_page=100&page=1`
-    );
-
-    const postGists = gists
-        .filter((gist) => findPostFile(gist.files) !== undefined)
-        .sort(
-            (a, b) =>
-                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
+    const [gists, owner] = await Promise.all([
+        fetchAllUserGists(safeUsername),
+        fetchGitHubUser(safeUsername),
+    ]);
+    const postGists = sortedPostGists(gists);
     const pageCount = Math.max(1, Math.ceil(postGists.length / BLOG_POSTS_PER_PAGE));
 
     if (page > pageCount) {
@@ -318,36 +428,17 @@ export async function fetchBlogPage(
         page * BLOG_POSTS_PER_PAGE
     );
 
-    const [owner, posts] = await Promise.all([
-        gists[0]?.owner ?? fetchGitHubUser(safeUsername),
-        Promise.all(
-            selectedGists.map(async (summary): Promise<BlogPost> => {
-                const gist = await fetchGist(summary.id);
-                const file = findPostFile(gist.files);
-                if (!file) throw new GitHubError("Gist post not found", 404);
+    const posts = (
+        await Promise.all(selectedGists.map((summary) => gistToBlogPost(summary)))
+    ).filter((post): post is BlogPost => post !== null);
 
-                const markdown = await getMarkdownContent(file);
-                const { metadata } = parsePostMarkdown(markdown);
-                const filenameTitle = file.filename
-                    .replace(/_post\.md$/i, "")
-                    .replace(/[_-]+/g, " ")
-                    .trim();
-
-                return {
-                    id: gist.id,
-                    title: metadata.title ?? filenameTitle ?? "Untitled post",
-                    description: metadata.description ?? gist.description ?? "",
-                    createdAt: gist.created_at,
-                    updatedAt: gist.updated_at,
-                    metadata,
-                };
-            })
-        ),
-    ]);
-
-    if (!owner) throw new GitHubError("GitHub user not found", 404);
-
-    return { owner, posts, page, pageCount, totalPosts: postGists.length };
+    return {
+        owner,
+        posts,
+        page,
+        pageCount,
+        totalPosts: Math.max(0, postGists.length - (selectedGists.length - posts.length)),
+    };
 }
 
 export async function fetchGistById(gistId: string): Promise<GistPost> {
@@ -363,20 +454,69 @@ export async function fetchGistById(gistId: string): Promise<GistPost> {
 
     const markdown = await getMarkdownContent(markdownFile);
     const { content, metadata } = parsePostMarkdown(markdown);
-    const filenameTitle = markdownFile.filename
-        .replace(/_post\.md$/i, "")
-        .replace(/\.md$/i, "")
-        .replace(/[_-]+/g, " ")
-        .trim();
 
     return {
         gistUrl: gist.html_url,
         markdownContent: content,
         metadata,
-        title: metadata.title || filenameTitle || "Untitled post",
+        title: metadata.title || postTitleFromFilename(markdownFile.filename) || "Untitled post",
         description: metadata.description || gist.description || "",
         owner: gist.owner,
-        createdAt: gist.created_at,
+        createdAt: publishedDate(metadata, gist.created_at),
         updatedAt: gist.updated_at,
+        sourceMarkdown: markdown,
+        filename: markdownFile.filename,
+        comments: gist.comments ?? 0,
+        revisions: gist.history?.length ?? 1,
     };
+}
+
+export async function fetchRecentBlogPosts(
+    username: string,
+    limit = 20
+): Promise<{ owner: Owner; posts: BlogPost[] }> {
+    const safeUsername = validateGitHubUsername(username);
+    const safeLimit = Math.min(Math.max(Math.floor(limit), 1), 50);
+    const [owner, gists] = await Promise.all([
+        fetchGitHubUser(safeUsername),
+        fetchAllUserGists(safeUsername),
+    ]);
+    const candidates = sortedPostGists(gists).slice(0, safeLimit + 10);
+    const posts: BlogPost[] = [];
+
+    for (let index = 0; index < candidates.length && posts.length < safeLimit; index += 5) {
+        const batch = await Promise.all(
+            candidates.slice(index, index + 5).map((gist) => gistToBlogPost(gist))
+        );
+        posts.push(...batch.filter((post): post is BlogPost => post !== null));
+    }
+
+    return { owner, posts: posts.slice(0, safeLimit) };
+}
+
+export async function fetchPostNavigation(
+    username: string,
+    gistId: string
+): Promise<PostNavigation> {
+    const safeGistId = validateGistId(gistId);
+    const gists = sortedPostGists(await fetchAllUserGists(username));
+    const index = gists.findIndex((gist) => gist.id.toLowerCase() === safeGistId);
+    if (index === -1) return {};
+
+    async function nearestPublished(
+        candidates: GitHubGist[]
+    ): Promise<PostNavigationItem | undefined> {
+        for (const gist of candidates) {
+            const post = await gistToBlogPost(gist);
+            if (post) return { id: post.id, title: post.title };
+        }
+        return undefined;
+    }
+
+    const [previous, next] = await Promise.all([
+        nearestPublished(gists.slice(index + 1)),
+        nearestPublished(gists.slice(0, index).reverse()),
+    ]);
+
+    return { previous, next };
 }

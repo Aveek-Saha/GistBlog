@@ -1,13 +1,44 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { fetchBlogPage, GitHubError } from "../../lib/github";
+import { PostExplorer } from "../components/post-explorer";
+import { fetchBlogPage, fetchGitHubUser, GitHubError } from "../../lib/github";
+import { absoluteUrl } from "../../lib/site";
 
 export const revalidate = 300;
 
 interface UserPostsPageProps {
     params: Promise<{ username: string }>;
     searchParams: Promise<{ page?: string | string[] }>;
+}
+
+export async function generateMetadata({ params }: UserPostsPageProps): Promise<Metadata> {
+    const { username } = await params;
+    try {
+        const owner = await fetchGitHubUser(username);
+        const title = `${owner.name || owner.login}'s GistBlog`;
+        const description = owner.bio || `Technical notes and articles by ${owner.login}.`;
+        return {
+            title,
+            description,
+            alternates: {
+                canonical: absoluteUrl(`/${owner.login}`),
+                types: {
+                    "application/rss+xml": absoluteUrl(`/${owner.login}/feed.xml`),
+                    "application/atom+xml": absoluteUrl(`/${owner.login}/atom.xml`),
+                },
+            },
+            openGraph: {
+                type: "website",
+                title,
+                description,
+                url: absoluteUrl(`/${owner.login}`),
+            },
+        };
+    } catch {
+        return { title: "Author blog" };
+    }
 }
 
 function pageFromSearchParam(value: string | string[] | undefined): number {
@@ -53,10 +84,20 @@ export default async function UserPostsPage({
                     />
                     <div>
                         <p className="eyebrow">PUBLIC GIST BLOG</p>
-                        <h1>{owner.login}</h1>
+                        <h1>{owner.name || owner.login}</h1>
                         <p>
-                            {totalPosts} published {totalPosts === 1 ? "post" : "posts"}
+                            @{owner.login} · {totalPosts} published {totalPosts === 1 ? "post" : "posts"}
                         </p>
+                        {owner.bio ? <p className="profile-bio">{owner.bio}</p> : null}
+                        <div className="profile-details">
+                            {owner.location ? <span>{owner.location}</span> : null}
+                            {owner.blog ? (
+                                <a href={owner.blog} target="_blank" rel="noreferrer">
+                                    Website ↗
+                                </a>
+                            ) : null}
+                            <a href={`/${owner.login}/feed.xml`}>RSS</a>
+                        </div>
                     </div>
                 </div>
                 <a
@@ -82,32 +123,15 @@ export default async function UserPostsPage({
                         <p>Create a Markdown gist ending in `_post.md` to get started.</p>
                     </div>
                 ) : (
-                    <ul className="post-list">
-                        {posts.map((post) => (
-                            <li key={post.id}>
-                                <Link href={`/post/${post.id}`}>
-                                    <div className="post-content">
-                                        <h3>{post.title}</h3>
-                                        {post.description ? (
-                                            <p className="post-description">
-                                                {post.description}
-                                            </p>
-                                        ) : null}
-                                    </div>
-                                    <time className="post-date" dateTime={post.createdAt}>
-                                        {new Date(post.createdAt).toLocaleDateString(
-                                            "en-US",
-                                            {
-                                                day: "numeric",
-                                                month: "short",
-                                                year: "numeric",
-                                            }
-                                        )}
-                                    </time>
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
+                    <PostExplorer
+                        posts={posts.map((post) => ({
+                            id: post.id,
+                            title: post.title,
+                            description: post.description,
+                            createdAt: post.createdAt,
+                            tags: post.metadata.tags ?? [],
+                        }))}
+                    />
                 )}
 
                 {pageCount > 1 ? (

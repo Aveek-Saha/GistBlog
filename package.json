@@ -7,18 +7,27 @@
     "build": "next build",
     "start": "next start",
     "test": "tsx --test lib/*.test.ts",
+    "test:e2e": "playwright test",
+    "test:all": "npm test && npm run test:e2e",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "github-slugger": "^2.0.0",
     "highlight.js": "^11.11.1",
+    "katex": "^0.18.1",
     "next": "16.3.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-markdown": "^10.1.0",
     "rehype-highlight": "^7.0.2",
-    "remark-gfm": "^4.0.1"
+    "rehype-katex": "^7.0.1",
+    "rehype-slug": "^6.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.62.1",
     "@types/node": "^20.19.43",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",

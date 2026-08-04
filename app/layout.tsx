@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 
 import { SiteFooter, SiteHeader } from "./components/site-header";
+import { getSiteUrl } from "../lib/site";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -17,11 +18,26 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
+    metadataBase: new URL(getSiteUrl()),
+    applicationName: "GistBlog",
     title: {
         default: "GistBlog — Turn GitHub Gists into blog posts",
         template: "%s · GistBlog",
     },
     description: "Turn your GitHub Gists into fast, readable blog posts.",
+    alternates: { canonical: "/" },
+    openGraph: {
+        type: "website",
+        siteName: "GistBlog",
+        title: "GistBlog — Turn GitHub Gists into blog posts",
+        description: "Turn your GitHub Gists into fast, readable blog posts.",
+        url: "/",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "GistBlog — Turn GitHub Gists into blog posts",
+        description: "Turn your GitHub Gists into fast, readable blog posts.",
+    },
 };
 
 export const viewport: Viewport = {

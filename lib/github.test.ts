@@ -100,6 +100,9 @@ test("loads blog post details concurrently", async () => {
         if (url.includes("/users/octocat/gists")) {
             return Response.json(summaries);
         }
+        if (url.endsWith("/users/octocat")) {
+            return Response.json(owner);
+        }
 
         const id = url.split("/").at(-1) ?? "";
         const summary = summaries.find((gist) => gist.id === id);

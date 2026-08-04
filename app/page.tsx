@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { GistUrlForm } from "./components/gist-url-form";
+import { PublishingToolkit } from "./components/publishing-toolkit";
+import { getSiteUrl } from "../lib/site";
 
 const features = [
     ["GitHub is the CMS", "Write and revise with the editor and workflow you already use."],
@@ -10,6 +12,8 @@ const features = [
 ];
 
 export default function Home() {
+    const siteUrl = getSiteUrl();
+
     return (
         <main>
             <section className="hero-section">
@@ -113,6 +117,18 @@ export default function Home() {
                     Read an example
                     <span aria-hidden="true">→</span>
                 </Link>
+            </section>
+
+            <section className="content-section toolkit-section" id="publishing-tools">
+                <div className="section-heading">
+                    <p className="eyebrow">PUBLISHING TOOLS</p>
+                    <h2>Everything your gist needs.</h2>
+                    <p>
+                        Generate safe frontmatter or add a one-click publishing shortcut to
+                        your browser.
+                    </p>
+                </div>
+                <PublishingToolkit siteUrl={siteUrl} />
             </section>
 
             <section className="content-section faq-section">

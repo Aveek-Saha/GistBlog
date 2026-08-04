@@ -11,8 +11,7 @@ Gist Blog is for posts that don't belong on your usual blog, maybe because it do
 # Usage
 
 ## Create a blog post
-1. Create a [GitHub Gist](https://gist.github.com/) in Markdown. 
-Make sure the file name ends with `_post.md` and has a title parameter in the `metadata`<sup>*</sup>.
+1. Create a public [GitHub Gist](https://gist.github.com/) with a Markdown file whose name ends in `_post.md`.
 1. Replace the URL: <br>
     `gist.github.com/{username}/`*{gist-id}* with <br>
     `gistblog.vercel.app/post/`*{gist-id}*
@@ -34,14 +33,18 @@ description: An even more interesting and unique description that provides more 
 ---
 ```
 
-For posts to show up in your blog page they **MUST** have the `title` field and a file name ending with `metadata`.
+Supported fields are `title`, `description`, `tags`, `date`, `canonical`, `image`, and `draft`. A title is optional; the filename is used as a fallback. Set `draft: true` to keep a gist out of public pages and feeds.
 
 # Features
 * Turn any GitHub Gist into a blog post.
 * Have a place to list all your gist blog posts
 * Switch between dark/light mode
-* Render markdown into HTML. Supports markdown tables and more
-* Add a title and description to you blog using YAML metadata
+* Render GitHub-flavored Markdown, syntax highlighting, math, images, and heading links
+* Search and filter an author's posts by title, description, and tag
+* Navigate between posts with a table of contents, reading progress, and previous/next links
+* Publish RSS and Atom feeds, canonical metadata, social cards, and raw Markdown exports
+* Generate frontmatter and use a bookmarklet to open any gist in GistBlog
+* Copy code blocks and share articles from the reader
 
 # Development
 To run locally, install the dependencies and start Next.js:
@@ -63,8 +66,7 @@ Before submitting changes, run:
 npm test
 npm run typecheck
 npm run build
+npm run test:e2e
 ```
- 
-### Note:
-For listing all posts on your profile, the content of each post has to be retreived. This is why only 5 posts are shown per page and even then the page might take 3~4 seconds to load.
 
+The browser suite runs Chromium at desktop and mobile viewports and includes automated accessibility checks. Install its browser once with `npx playwright install chromium`.
