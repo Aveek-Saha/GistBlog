@@ -53,12 +53,15 @@ export interface BlogPage {
     posts: BlogPost[];
     page: number;
     pageCount: number;
+    totalPosts: number;
 }
 
 export interface GistPost {
     gistUrl: string;
     markdownContent: string;
     metadata: PostMetadata;
+    title: string;
+    description: string;
     owner: Owner;
     createdAt: string;
     updatedAt: string;
@@ -344,7 +347,7 @@ export async function fetchBlogPage(
 
     if (!owner) throw new GitHubError("GitHub user not found", 404);
 
-    return { owner, posts, page, pageCount };
+    return { owner, posts, page, pageCount, totalPosts: postGists.length };
 }
 
 export async function fetchGistById(gistId: string): Promise<GistPost> {
@@ -360,11 +363,18 @@ export async function fetchGistById(gistId: string): Promise<GistPost> {
 
     const markdown = await getMarkdownContent(markdownFile);
     const { content, metadata } = parsePostMarkdown(markdown);
+    const filenameTitle = markdownFile.filename
+        .replace(/_post\.md$/i, "")
+        .replace(/\.md$/i, "")
+        .replace(/[_-]+/g, " ")
+        .trim();
 
     return {
         gistUrl: gist.html_url,
         markdownContent: content,
         metadata,
+        title: metadata.title || filenameTitle || "Untitled post",
+        description: metadata.description || gist.description || "",
         owner: gist.owner,
         createdAt: gist.created_at,
         updatedAt: gist.updated_at,

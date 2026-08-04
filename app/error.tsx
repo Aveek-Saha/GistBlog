@@ -14,10 +14,11 @@ export default function ErrorPage({
     }, [error]);
 
     return (
-        <main>
+        <main className="state-page">
+            <p className="state-code">UPSTREAM ERROR</p>
             <h1>Unable to load this page</h1>
             <p>GitHub may be unavailable or temporarily rate limited.</p>
-            <button type="button" onClick={reset}>
+            <button className="action-button" type="button" onClick={reset}>
                 Try again
             </button>
         </main>

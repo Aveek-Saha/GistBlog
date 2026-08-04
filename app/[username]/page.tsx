@@ -39,46 +39,62 @@ export default async function UserPostsPage({
         throw error;
     }
 
-    const { owner, posts, pageCount } = blog;
+    const { owner, posts, pageCount, totalPosts } = blog;
 
     return (
-        <main>
-            <header className="header">
-                <h1 className="user-info">
-                    <a href={owner.html_url} className="link">
-                        {owner.login}
-                    </a>
-                    &apos;s Blog
-                    {/* GitHub controls this URL; native img avoids configuring every avatar host. */}
+        <main className="blog-page">
+            <header className="profile-header">
+                <div className="profile-identity">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         className="profile-picture"
                         src={owner.avatar_url}
                         alt={`${owner.login}'s avatar`}
                     />
-                </h1>
+                    <div>
+                        <p className="eyebrow">PUBLIC GIST BLOG</p>
+                        <h1>{owner.login}</h1>
+                        <p>
+                            {totalPosts} published {totalPosts === 1 ? "post" : "posts"}
+                        </p>
+                    </div>
+                </div>
+                <a
+                    href={owner.html_url}
+                    className="profile-link"
+                    target="_blank"
+                    rel="noreferrer"
+                >
+                    View GitHub
+                    <span aria-hidden="true">↗</span>
+                </a>
             </header>
 
-            <section className="posts" aria-label="Blog posts">
+            <section className="posts-section" aria-label="Blog posts">
+                <div className="posts-section-header">
+                    <h2>POSTS</h2>
+                    <span>Newest first</span>
+                </div>
+
                 {posts.length === 0 ? (
-                    <p>No published gist posts found.</p>
+                    <div className="empty-state">
+                        <strong>No published posts yet.</strong>
+                        <p>Create a Markdown gist ending in `_post.md` to get started.</p>
+                    </div>
                 ) : (
                     <ul className="post-list">
                         {posts.map((post) => (
                             <li key={post.id}>
-                                <Link href={`/post/${post.id}`} className="link">
+                                <Link href={`/post/${post.id}`}>
                                     <div className="post-content">
-                                        <h2>{post.title}</h2>
+                                        <h3>{post.title}</h3>
                                         {post.description ? (
                                             <p className="post-description">
                                                 {post.description}
                                             </p>
                                         ) : null}
                                     </div>
-                                    <time
-                                        className="post-date"
-                                        dateTime={post.createdAt}
-                                    >
+                                    <time className="post-date" dateTime={post.createdAt}>
                                         {new Date(post.createdAt).toLocaleDateString(
                                             "en-US",
                                             {
@@ -93,27 +109,25 @@ export default async function UserPostsPage({
                         ))}
                     </ul>
                 )}
-            </section>
 
-            {pageCount > 1 ? (
-                <nav className="pagination" aria-label="Blog pagination">
-                    {page > 1 ? (
-                        <Link href={`/${owner.login}?page=${page - 1}`}>
-                            Previous
-                        </Link>
-                    ) : (
-                        <span />
-                    )}
-                    <span>
-                        Page {page} of {pageCount}
-                    </span>
-                    {page < pageCount ? (
-                        <Link href={`/${owner.login}?page=${page + 1}`}>Next</Link>
-                    ) : (
-                        <span />
-                    )}
-                </nav>
-            ) : null}
+                {pageCount > 1 ? (
+                    <nav className="pagination" aria-label="Blog pagination">
+                        {page > 1 ? (
+                            <Link href={`/${owner.login}?page=${page - 1}`}>← Previous</Link>
+                        ) : (
+                            <span />
+                        )}
+                        <span>
+                            Page {page} of {pageCount}
+                        </span>
+                        {page < pageCount ? (
+                            <Link href={`/${owner.login}?page=${page + 1}`}>Next →</Link>
+                        ) : (
+                            <span />
+                        )}
+                    </nav>
+                ) : null}
+            </section>
         </main>
     );
 }
