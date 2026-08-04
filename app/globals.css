@@ -25,22 +25,22 @@
 :root[data-theme="dark"] {
     color-scheme: dark;
     --canvas-background: #070708;
-    --background: #151516;
-    --background-subtle: #1c1c1e;
-    --background-hover: #242425;
+    --background: #070708;
+    --background-subtle: #0e0e0f;
+    --background-hover: #151516;
     --foreground: #e8e8ea;
     --text: #b9b9c0;
     --text-weak: #929299;
     --border: rgba(232, 232, 234, 0.13);
-    --border-strong: #39393e;
+    --border-strong: #303034;
     --accent: #f4f578;
-    --accent-soft: #242419;
+    --accent-soft: #18180c;
     --button: #e8e8ea;
     --button-hover: #ffffff;
-    --button-text: #151516;
+    --button-text: #070708;
     --code-background: #0d1117;
     --code-foreground: #c9d1d9;
-    --header-background: rgba(21, 21, 22, 0.9);
+    --header-background: rgba(7, 7, 8, 0.9);
 }
 
 * {
