@@ -3,6 +3,7 @@
 
 :root {
     color-scheme: light;
+    --canvas-background: #fcfbfb;
     --background: #fcfbfb;
     --background-subtle: #f7f6f5;
     --background-hover: #f0efed;
@@ -23,22 +24,23 @@
 
 :root[data-theme="dark"] {
     color-scheme: dark;
-    --background: #130f0f;
-    --background-subtle: #1b1717;
-    --background-hover: #272222;
-    --foreground: #f3eded;
-    --text: #b9b2b2;
-    --text-weak: #938b8b;
-    --border: rgba(243, 237, 237, 0.13);
-    --border-strong: #4a4343;
-    --accent: #ecefae;
-    --accent-soft: #202113;
-    --button: #f3eded;
+    --canvas-background: #070708;
+    --background: #151516;
+    --background-subtle: #1c1c1e;
+    --background-hover: #242425;
+    --foreground: #e8e8ea;
+    --text: #b9b9c0;
+    --text-weak: #929299;
+    --border: rgba(232, 232, 234, 0.13);
+    --border-strong: #39393e;
+    --accent: #f4f578;
+    --accent-soft: #242419;
+    --button: #e8e8ea;
     --button-hover: #ffffff;
-    --button-text: #130f0f;
-    --code-background: #0b0909;
-    --code-foreground: #e8e3e3;
-    --header-background: rgba(19, 15, 15, 0.9);
+    --button-text: #151516;
+    --code-background: #0d1117;
+    --code-foreground: #c9d1d9;
+    --header-background: rgba(21, 21, 22, 0.9);
 }
 
 * {
@@ -47,12 +49,12 @@
 
 html {
     scroll-behavior: smooth;
-    background: var(--background);
+    background: var(--canvas-background);
 }
 
 body {
     margin: 0;
-    background: var(--background);
+    background: var(--canvas-background);
     color: var(--text);
     font-family: var(--font-geist-mono), ui-monospace, monospace;
     font-size: 15px;
@@ -108,6 +110,7 @@ a:hover {
     min-height: 100vh;
     margin: 0 auto;
     border-inline: 1px solid var(--border);
+    background: var(--background);
 }
 
 .page-content {
