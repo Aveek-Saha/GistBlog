@@ -44,17 +44,27 @@ For posts to show up in your blog page they **MUST** have the `title` field and 
 * Add a title and description to you blog using YAML metadata
 
 # Development
-To run locally for development, fork the project, install the Vercel CLI
+To run locally, install the dependencies and start Next.js:
 
 ```
-npm i -g vercel
-cd GistBlog
-vercel dev
+npm install
+npm run dev
 ```
 
-Then go to `localhost:3000` to see the site up and running
+Then go to `localhost:3000`.
+
+For a higher GitHub API allowance, copy `.env.example` to `.env.local` and set
+`GITHUB_TOKEN` to a server-side token. Never expose this value through a
+`NEXT_PUBLIC_` variable.
+
+Before submitting changes, run:
+
+```
+npm test
+npm run typecheck
+npm run build
+```
  
 ### Note:
 For listing all posts on your profile, the content of each post has to be retreived. This is why only 5 posts are shown per page and even then the page might take 3~4 seconds to load.
-
 

@@ -1,65 +1,119 @@
-import { fetchGists, Owner } from "../../lib/github";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import { fetchBlogPage, GitHubError } from "../../lib/github";
+
+export const revalidate = 300;
 
 interface UserPostsPageProps {
     params: Promise<{ username: string }>;
+    searchParams: Promise<{ page?: string | string[] }>;
 }
 
-export default async function UserPostsPage({ params }: UserPostsPageProps) {
-    const { username } = await params;
-    const gists = await fetchGists(username);
+function pageFromSearchParam(value: string | string[] | undefined): number {
+    if (value === undefined) return 1;
+    if (Array.isArray(value) || !/^\d+$/.test(value)) notFound();
 
-    var owner: Owner = { login: "", avatar_url: "", html_url: "" };
-    if (gists.length > 0) owner = gists[0].owner;
+    const page = Number(value);
+    if (!Number.isSafeInteger(page) || page < 1) notFound();
+    return page;
+}
+
+export default async function UserPostsPage({
+    params,
+    searchParams,
+}: UserPostsPageProps) {
+    const [{ username }, query] = await Promise.all([params, searchParams]);
+    const page = pageFromSearchParam(query.page);
+
+    let blog;
+    try {
+        blog = await fetchBlogPage(username, page);
+    } catch (error) {
+        if (
+            error instanceof GitHubError &&
+            (error.status === 400 || error.status === 404)
+        ) {
+            notFound();
+        }
+        throw error;
+    }
+
+    const { owner, posts, pageCount } = blog;
 
     return (
-        <div>
-            <div className="header">
-                <h1 className=" user-info">
+        <main>
+            <header className="header">
+                <h1 className="user-info">
                     <a href={owner.html_url} className="link">
                         {owner.login}
                     </a>
-                    's Blog
+                    &apos;s Blog
+                    {/* GitHub controls this URL; native img avoids configuring every avatar host. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         className="profile-picture"
                         src={owner.avatar_url}
-                        alt={owner.login}
+                        alt={`${owner.login}'s avatar`}
                     />
                 </h1>
-            </div>
-            <div className="posts">
-                <ul className="post-list">
-                    {gists.map((gist) => {
-                        const fileName = Object.values(gist.files)[0]?.filename;
-                        const metadata = gist.metadata;
+            </header>
 
-                        return (
-                            <li key={gist.id}>
-                                <a href={`/post/${gist.id}`} className="link">
+            <section className="posts" aria-label="Blog posts">
+                {posts.length === 0 ? (
+                    <p>No published gist posts found.</p>
+                ) : (
+                    <ul className="post-list">
+                        {posts.map((post) => (
+                            <li key={post.id}>
+                                <Link href={`/post/${post.id}`} className="link">
                                     <div className="post-content">
-                                        <h4>
-                                            {fileName
-                                                ?.replace(/_/g, " ")
-                                                .replace(/\.md$/, "")}
-                                        </h4>
-                                        <div className="post-description">
-                                            {gist.description}
-                                        </div>
+                                        <h2>{post.title}</h2>
+                                        {post.description ? (
+                                            <p className="post-description">
+                                                {post.description}
+                                            </p>
+                                        ) : null}
                                     </div>
-                                    <div className="post-date">
-                                        {new Date(
-                                            gist.created_at
-                                        ).toLocaleDateString("en-US", {
-                                            day: "numeric",
-                                            month: "short",
-                                            year: "numeric",
-                                        })}
-                                    </div>
-                                </a>
+                                    <time
+                                        className="post-date"
+                                        dateTime={post.createdAt}
+                                    >
+                                        {new Date(post.createdAt).toLocaleDateString(
+                                            "en-US",
+                                            {
+                                                day: "numeric",
+                                                month: "short",
+                                                year: "numeric",
+                                            }
+                                        )}
+                                    </time>
+                                </Link>
                             </li>
-                        );
-                    })}
-                </ul>
-            </div>
-        </div>
+                        ))}
+                    </ul>
+                )}
+            </section>
+
+            {pageCount > 1 ? (
+                <nav className="pagination" aria-label="Blog pagination">
+                    {page > 1 ? (
+                        <Link href={`/${owner.login}?page=${page - 1}`}>
+                            Previous
+                        </Link>
+                    ) : (
+                        <span />
+                    )}
+                    <span>
+                        Page {page} of {pageCount}
+                    </span>
+                    {page < pageCount ? (
+                        <Link href={`/${owner.login}?page=${page + 1}`}>Next</Link>
+                    ) : (
+                        <span />
+                    )}
+                </nav>
+            ) : null}
+        </main>
     );
 }
