@@ -1167,6 +1167,7 @@ a:hover {
     color: var(--foreground);
     letter-spacing: -0.035em;
     line-height: 1.25;
+    scroll-margin-top: 100px;
 }
 
 .prose h1 {
@@ -1468,6 +1469,13 @@ a:hover {
 
     .site-header {
         min-height: 68px;
+    }
+
+    .prose h1,
+    .prose h2,
+    .prose h3,
+    .prose h4 {
+        scroll-margin-top: 88px;
     }
 
     .site-nav {

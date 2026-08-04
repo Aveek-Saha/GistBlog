@@ -62,6 +62,24 @@ test("real author, article, feed, and Markdown export routes work", async ({
     ).toBeVisible();
     await expect(page.getByRole("button", { name: "Share article" })).toBeVisible();
 
+    const sectionLink = page
+        .getByRole("navigation", { name: "On this page" })
+        .getByRole("link")
+        .first();
+    const sectionId = (await sectionLink.getAttribute("href"))?.slice(1);
+    expect(sectionId).toBeTruthy();
+    await sectionLink.click();
+    const sectionOffset = async () => {
+        return page.evaluate((id) => {
+            const heading = document.getElementById(id);
+            const header = document.querySelector<HTMLElement>(".site-header");
+            if (!heading || !header) return -1;
+            return Math.round(heading.getBoundingClientRect().top - header.getBoundingClientRect().bottom);
+        }, sectionId as string);
+    };
+    await expect.poll(sectionOffset).toBeLessThanOrEqual(32);
+    expect(await sectionOffset()).toBeGreaterThanOrEqual(12);
+
     const rss = await request.get("/Aveek-Saha/feed.xml");
     expect(rss.ok()).toBeTruthy();
     expect(rss.headers()["content-type"]).toContain("application/rss+xml");
