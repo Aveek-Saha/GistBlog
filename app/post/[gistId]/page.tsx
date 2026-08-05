@@ -30,7 +30,8 @@ interface PostPageProps {
 }
 
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
-    const { gistId } = await params;
+    const { gistId: rawGistId } = await params;
+    const gistId = rawGistId.trim().toLowerCase();
     try {
         const post = await fetchGistById(gistId);
         if (post.metadata.draft) return { title: "Draft", robots: { index: false } };

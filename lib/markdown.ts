@@ -73,6 +73,7 @@ export function extractTableOfContents(markdown: string): TableOfContentsItem[] 
 export function readingTime(markdown: string): number {
     const readable = markdown
         .replace(/```[\s\S]*?```/g, " ")
+        .replace(/~~~[\s\S]*?~~~/g, " ")
         .replace(/`[^`]*`/g, " ")
         .replace(/https?:\/\/\S+/g, " ");
     const words = readable.trim().split(/\s+/).filter(Boolean).length;

@@ -34,10 +34,10 @@ export default async function PostOpenGraphImage({
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                 <div style={{ fontSize: post.title.length > 70 ? 50 : 64, fontWeight: 700, letterSpacing: "-3px", lineHeight: 1.08 }}>
-                    {post.title.slice(0, 140)}
+                    {(post.metadata.draft ? "Draft" : post.title).slice(0, 140)}
                 </div>
                 <div style={{ fontSize: 23, color: "#646262" }}>
-                    {post.description.slice(0, 180) || "Published from a GitHub Gist"}
+                    {(post.metadata.draft ? "" : post.description).slice(0, 180) || "Published from a GitHub Gist"}
                 </div>
             </div>
         </div>,
