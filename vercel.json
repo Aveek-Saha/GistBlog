@@ -1,7 +1,0 @@
-{
-    "rewrites": [
-      { "source": "/post/:id", "destination": "/api/post" },
-      { "source": "/:username", "destination": "/api/blog" }
-    ],
-    "trailingSlash": false
-}
