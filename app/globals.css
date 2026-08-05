@@ -140,7 +140,7 @@ a:hover {
     align-items: center;
     gap: 12px;
     color: var(--foreground);
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 700;
     letter-spacing: -0.035em;
 }
@@ -530,6 +530,11 @@ a:hover {
     color: var(--text-weak);
 }
 
+.feature-list > li > span {
+    font-size: 16px;
+    line-height: 1.35;
+}
+
 .steps-list strong,
 .feature-list strong {
     display: inline-block;
@@ -719,11 +724,13 @@ a:hover {
     display: inline-block;
     width: 30px;
     color: var(--text-weak);
-    content: ">";
+    font-size: 12px;
+    line-height: 1;
+    content: "■";
 }
 
 .faq-list details[open] summary::before {
-    content: "^";
+    content: "◆";
 }
 
 .faq-list summary::-webkit-details-marker {

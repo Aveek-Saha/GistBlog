@@ -105,7 +105,7 @@ export default function Home() {
                 <ul className="feature-list">
                     {features.map(([title, description]) => (
                         <li key={title}>
-                            <span aria-hidden="true">*</span>
+                            <span aria-hidden="true">—</span>
                             <p>
                                 <strong>{title}</strong>
                                 {description}
