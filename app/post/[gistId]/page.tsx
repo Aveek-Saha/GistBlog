@@ -10,6 +10,7 @@ import remarkMath from "remark-math";
 
 import { ArticleActions } from "../../components/article-actions";
 import { CodeBlock } from "../../components/code-block";
+import { GistComments } from "../../components/gist-comments";
 import {
     fetchGistById,
     fetchPostNavigation,
@@ -144,8 +145,8 @@ export default async function PostPage({ params }: PostPageProps) {
                             View source ↗
                         </a>
                         <a href={`/post/${gistId}/raw`}>Download Markdown</a>
-                        <a href={`${post.gistUrl}#comments`} target="_blank" rel="noreferrer">
-                            {post.comments} GitHub {post.comments === 1 ? "comment" : "comments"}
+                        <a href="#comments-heading">
+                            {post.comments} {post.comments === 1 ? "comment" : "comments"}
                         </a>
                         <span>{post.revisions} revisions</span>
                     </div>
@@ -198,6 +199,13 @@ export default async function PostPage({ params }: PostPageProps) {
                     </ReactMarkdown>
                 </article>
             </div>
+
+            <GistComments
+                key={gistId}
+                gistId={gistId}
+                gistUrl={post.gistUrl}
+                totalComments={post.comments}
+            />
 
             {navigation.previous || navigation.next ? (
                 <nav className="article-navigation" aria-label="More articles">

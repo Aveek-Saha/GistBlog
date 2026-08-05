@@ -3,8 +3,11 @@ const GITHUB_API_VERSION = "2022-11-28";
 const GITHUB_REVALIDATE_SECONDS = 300;
 const GITHUB_REQUEST_TIMEOUT_MS = 8_000;
 const MAX_MARKDOWN_BYTES = 512_000;
+const MAX_COMMENT_CHARACTERS = 32_000;
 const GISTS_PER_GITHUB_PAGE = 100;
 const MAX_GITHUB_PAGES = 10;
+const COMMENTS_PER_GITHUB_PAGE = 100;
+const MAX_GITHUB_COMMENT_PAGES = 3;
 
 export const BLOG_POSTS_PER_PAGE = 5;
 
@@ -91,6 +94,15 @@ export interface PostNavigationItem {
 export interface PostNavigation {
     previous?: PostNavigationItem;
     next?: PostNavigationItem;
+}
+
+export interface GistComment {
+    id: number;
+    body: string;
+    createdAt: string;
+    updatedAt: string;
+    author: Owner | null;
+    authorAssociation?: string;
 }
 
 export class GitHubError extends Error {
@@ -360,6 +372,82 @@ async function fetchGist(gistId: string): Promise<GitHubGist> {
     return githubFetch<GitHubGist>(
         `/gists/${encodeURIComponent(validateGistId(gistId))}`
     );
+}
+
+function parseCommentAuthor(value: unknown): Owner | null {
+    if (!isRecord(value)) return null;
+    if (
+        typeof value.login !== "string" ||
+        typeof value.avatar_url !== "string" ||
+        typeof value.html_url !== "string"
+    ) {
+        return null;
+    }
+
+    return {
+        login: value.login.slice(0, 100),
+        avatar_url: value.avatar_url.slice(0, 500),
+        html_url: value.html_url.slice(0, 500),
+    };
+}
+
+function parseGistComment(value: unknown): GistComment | null {
+    if (!isRecord(value)) return null;
+    if (
+        typeof value.id !== "number" ||
+        !Number.isSafeInteger(value.id) ||
+        typeof value.body !== "string" ||
+        typeof value.created_at !== "string" ||
+        typeof value.updated_at !== "string"
+    ) {
+        return null;
+    }
+
+    return {
+        id: value.id,
+        body: value.body.slice(0, MAX_COMMENT_CHARACTERS),
+        createdAt: value.created_at.slice(0, 50),
+        updatedAt: value.updated_at.slice(0, 50),
+        author: parseCommentAuthor(value.user),
+        authorAssociation:
+            typeof value.author_association === "string"
+                ? value.author_association.slice(0, 30)
+                : undefined,
+    };
+}
+
+export async function fetchGistComments(
+    gistId: string,
+    expectedCount?: number
+): Promise<GistComment[]> {
+    const safeGistId = validateGistId(gistId);
+    const comments: GistComment[] = [];
+    const knownCount =
+        typeof expectedCount === "number" && Number.isSafeInteger(expectedCount)
+            ? Math.max(0, expectedCount)
+            : undefined;
+    const totalPages = knownCount
+        ? Math.max(1, Math.ceil(knownCount / COMMENTS_PER_GITHUB_PAGE))
+        : MAX_GITHUB_COMMENT_PAGES;
+    const firstPage = Math.max(1, totalPages - MAX_GITHUB_COMMENT_PAGES + 1);
+
+    for (let page = firstPage; page <= totalPages; page += 1) {
+        const data = await githubFetch<unknown>(
+            `/gists/${encodeURIComponent(safeGistId)}/comments?per_page=${COMMENTS_PER_GITHUB_PAGE}&page=${page}`
+        );
+        if (!Array.isArray(data)) {
+            throw new GitHubError("Invalid GitHub comments response", 502);
+        }
+
+        comments.push(
+            ...data
+                .map(parseGistComment)
+                .filter((comment): comment is GistComment => comment !== null)
+        );
+        if (knownCount === undefined && data.length < COMMENTS_PER_GITHUB_PAGE) break;
+    }
+
+    return comments;
 }
 
 async function fetchAllUserGists(username: string): Promise<GitHubGist[]> {

@@ -80,6 +80,20 @@ test("real author, article, feed, and Markdown export routes work", async ({
     await expect.poll(sectionOffset).toBeLessThanOrEqual(32);
     expect(await sectionOffset()).toBeGreaterThanOrEqual(12);
 
+    await expect(
+        page.getByRole("region", { name: "Join the discussion." })
+    ).toBeVisible();
+    await expect(
+        page.getByRole("link", { name: "Add a comment on GitHub" })
+    ).toHaveAttribute("href", /gist\.github\.com\/.+#new_comment_field$/);
+
+    const comments = await request.get(
+        "/api/gists/62538a714d95ae8b2aafdb5c6751f2c5/comments?count=0"
+    );
+    expect(comments.ok()).toBeTruthy();
+    expect(await comments.json()).toEqual({ comments: [] });
+    expect(comments.headers()["cache-control"]).toContain("stale-while-revalidate");
+
     const rss = await request.get("/Aveek-Saha/feed.xml");
     expect(rss.ok()).toBeTruthy();
     expect(rss.headers()["content-type"]).toContain("application/rss+xml");

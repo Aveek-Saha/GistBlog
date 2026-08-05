@@ -3,6 +3,7 @@ import { afterEach, test } from "node:test";
 
 import {
     fetchBlogPage,
+    fetchGistComments,
     fetchGistById,
     findPostFile,
     GitHubError,
@@ -175,4 +176,41 @@ test("does not fetch a truncated gist from an untrusted raw URL", async () => {
         return error instanceof GitHubError && error.status === 502;
     });
     assert.equal(calls, 1);
+});
+
+test("loads and bounds safe gist comment fields", async () => {
+    globalThis.fetch = async (input) => {
+        assert.match(String(input), /\/gists\/abcde\/comments\?per_page=100&page=1$/);
+        return Response.json([
+            {
+                id: 42,
+                body: "Hello **from GitHub**",
+                created_at: "2026-08-01T00:00:00Z",
+                updated_at: "2026-08-02T00:00:00Z",
+                author_association: "OWNER",
+                user: {
+                    login: "octocat",
+                    avatar_url: "https://avatars.githubusercontent.com/u/1",
+                    html_url: "https://github.com/octocat",
+                },
+                ignored: "field",
+            },
+            { id: "invalid", body: null },
+        ]);
+    };
+
+    assert.deepEqual(await fetchGistComments("abcde"), [
+        {
+            id: 42,
+            body: "Hello **from GitHub**",
+            createdAt: "2026-08-01T00:00:00Z",
+            updatedAt: "2026-08-02T00:00:00Z",
+            authorAssociation: "OWNER",
+            author: {
+                login: "octocat",
+                avatar_url: "https://avatars.githubusercontent.com/u/1",
+                html_url: "https://github.com/octocat",
+            },
+        },
+    ]);
 });
