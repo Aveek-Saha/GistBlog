@@ -719,11 +719,11 @@ a:hover {
     display: inline-block;
     width: 30px;
     color: var(--text-weak);
-    content: "+";
+    content: ">";
 }
 
 .faq-list details[open] summary::before {
-    content: "−";
+    content: "^";
 }
 
 .faq-list summary::-webkit-details-marker {

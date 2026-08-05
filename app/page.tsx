@@ -74,21 +74,21 @@ export default function Home() {
                 </div>
                 <ol className="steps-list">
                     <li>
-                        <span>01</span>
+                        <span>1</span>
                         <div>
                             <strong>Write in Markdown</strong>
                             <p>Create a public GitHub Gist with a file ending in `_post.md`.</p>
                         </div>
                     </li>
                     <li>
-                        <span>02</span>
+                        <span>2</span>
                         <div>
                             <strong>Paste the URL</strong>
                             <p>Drop the gist URL into GistBlog. We securely render the content.</p>
                         </div>
                     </li>
                     <li>
-                        <span>03</span>
+                        <span>3</span>
                         <div>
                             <strong>Share the clean version</strong>
                             <p>Send the article URL. Updates stay connected to the source gist.</p>
@@ -105,7 +105,7 @@ export default function Home() {
                 <ul className="feature-list">
                     {features.map(([title, description]) => (
                         <li key={title}>
-                            <span aria-hidden="true">[*]</span>
+                            <span aria-hidden="true">*</span>
                             <p>
                                 <strong>{title}</strong>
                                 {description}
